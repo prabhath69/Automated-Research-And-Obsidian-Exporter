@@ -8,7 +8,13 @@ from app.agents.extractor import extract_evidence
 from app.agents.claim_generator import generate_claims
 from app.agents.synthesizer import synthesize_report
 from app.agents.critic import critique_report
-from app.graph.routing import route_after_critique, refinement_node
+from app.agents.guardrails import input_guardrail, output_guardrail
+from app.graph.routing import (
+    route_after_critique, 
+    refinement_node,
+    route_after_input_guardrail,
+    route_after_output_guardrail
+)
 from app.exporters.obsidian import generate_obsidian_notes
 
 def create_research_graph():
@@ -16,6 +22,7 @@ def create_research_graph():
     workflow = StateGraph(ResearchState)
     
     # Add Nodes
+    workflow.add_node("input_guardrail", input_guardrail)
     workflow.add_node("planner", plan_research)
     workflow.add_node("task_generator", generate_tasks)
     workflow.add_node("researcher", conduct_research)
@@ -25,10 +32,21 @@ def create_research_graph():
     workflow.add_node("synthesizer", synthesize_report)
     workflow.add_node("critic", critique_report)
     workflow.add_node("refinement_node", refinement_node)
+    workflow.add_node("output_guardrail", output_guardrail)
     workflow.add_node("obsidian_exporter", generate_obsidian_notes)
     
     # Define Edges
-    workflow.set_entry_point("planner")
+    workflow.set_entry_point("input_guardrail")
+    
+    workflow.add_conditional_edges(
+        "input_guardrail",
+        route_after_input_guardrail,
+        {
+            "planner": "planner",
+            "END": END
+        }
+    )
+    
     workflow.add_edge("planner", "task_generator")
     workflow.add_edge("task_generator", "researcher")
     workflow.add_edge("researcher", "evaluator")
@@ -43,7 +61,16 @@ def create_research_graph():
         route_after_critique,
         {
             "refinement_node": "refinement_node",
-            "obsidian_exporter": "obsidian_exporter"
+            "obsidian_exporter": "output_guardrail"
+        }
+    )
+    
+    workflow.add_conditional_edges(
+        "output_guardrail",
+        route_after_output_guardrail,
+        {
+            "obsidian_exporter": "obsidian_exporter",
+            "END": END
         }
     )
     

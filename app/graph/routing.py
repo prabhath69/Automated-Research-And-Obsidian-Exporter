@@ -31,3 +31,17 @@ def refinement_node(state: ResearchState) -> dict:
             tasks.append(t)
             
     return {"research_tasks": tasks}
+
+def route_after_input_guardrail(state: ResearchState) -> Literal["planner", "END"]:
+    """Routes to END if input guardrail fails, else planner."""
+    errors = state.get("errors", [])
+    if any("Input blocked:" in e for e in errors):
+        return "END"
+    return "planner"
+
+def route_after_output_guardrail(state: ResearchState) -> Literal["obsidian_exporter", "END"]:
+    """Routes to END if output guardrail fails, else exporter."""
+    errors = state.get("errors", [])
+    if any("Output blocked:" in e for e in errors):
+        return "END"
+    return "obsidian_exporter"

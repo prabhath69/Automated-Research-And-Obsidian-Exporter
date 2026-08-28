@@ -24,19 +24,25 @@ if st.button("Start Research"):
             res.raise_for_status()
             result = res.json()
             
+            errors = result.get("errors", [])
+            if errors:
+                st.error("Graph Execution Errors or Guardrail Blocks:")
+                for e in errors:
+                    st.error(f"- {e}")
+            
             st.header("1. Research Plan")
-            plan = result.get("research_plan", {})
-            st.write(f"**Objective:** {plan.get('main_objective', '')}")
+            plan = result.get("research_plan") or {}
+            st.write(f"**Objective:** {plan.get('main_objective', 'N/A')}")
             st.write("**Sub-Questions:**")
             for q in plan.get("sub_questions", []):
                 st.write(f"- {q}")
                 
-            st.header(f"2. Collected Sources ({len(result.get('collected_sources', []))})")
-            for source in result.get("collected_sources", []):
+            st.header(f"2. Collected Sources ({len(result.get('collected_sources') or [])})")
+            for source in (result.get("collected_sources") or []):
                 st.write(f"- [{source['source_id']}] {source['title']} ({source['url']})")
                 
             st.header("3. Final Report")
-            st.markdown(result.get("final_report", "No report generated."))
+            st.markdown(result.get("final_report") or "No report generated.")
             
         except Exception as e:
             st.error(f"Error: {e}")

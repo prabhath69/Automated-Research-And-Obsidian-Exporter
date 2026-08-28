@@ -1,1 +1,18 @@
-/.env
+# Environments
+.env
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Databases
+*.db
+*.sqlite3
+
+# Output folders
+output/
+evals/__pycache__/

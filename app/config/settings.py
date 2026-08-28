@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     TAVILY_API_KEY: Optional[str] = None
     USE_TAVILY: bool = False
     
+    # LangSmith Observability
+    LANGCHAIN_TRACING_V2: Optional[bool] = False
+    LANGCHAIN_API_KEY: Optional[str] = None
+    LANGCHAIN_PROJECT: Optional[str] = None
+    
     # Cost control / limits
     MAX_RESEARCH_TASKS: int = 5
     MAX_SOURCES_PER_TASK: int = 3
